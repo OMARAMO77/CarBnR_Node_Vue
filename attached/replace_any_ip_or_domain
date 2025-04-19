@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+# ANSI color codes for output messages
+GREEN='\033[0;32m'  # Green for success
+RED='\033[0;31m'    # Red for error
+YELLOW='\033[1;33m' # Yellow for warnings
+NC='\033[0m'        # No color
+
+# Function to print colored messages
+print_message() {
+    local msg="$1"
+    local color="$2"
+    echo -e "${color}${msg}${NC}"
+}
+
+# Check if the correct number of arguments are provided
+if [ "$#" -lt 3 ]; then
+    print_message "Usage: $0 FILE1 FILE2 ... old_domain new_domain" "$RED"
+    exit 1
+fi
+
+# Extract the old domain and new domain from the arguments
+old_domain="${@: -2:1}"  # Second last argument
+new_domain="${@: -1}"    # Last argument
+
+# Loop through the files provided as arguments (except last two)
+for file in "${@:1:$#-2}"; do
+    # Check if the file exists and is readable
+    if [ -f "$file" ] && [ -r "$file" ]; then
+        # Check if the old domain exists in the file
+        if grep -q "$old_domain" "$file"; then
+            # Substitute the old domain with the new domain
+            sed -i "s/$old_domain/$new_domain/g" "$file"
+            print_message "Substituted '$old_domain' with '$new_domain' in $file" "$GREEN"
+        else
+            print_message "Warning: Domain '$old_domain' not found in $file." "$YELLOW"
+        fi
+    else
+        print_message "Error: File '$file' not found or not readable." "$RED"
+    fi
+done
+
+# Success message
+print_message "Domain substitution completed!" "$GREEN"
