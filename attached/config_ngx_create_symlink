@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+# ANSI color codes
+GREEN='\033[0;32m'  # Green for success messages
+RED='\033[0;31m'    # Red for error messages
+NC='\033[0m'        # No color (reset)
+
+# Paths
+CONFIG_SOURCE="/CarBnR_Node_Vue/attached/locations_config_node"
+CONFIG_DEST="/etc/nginx/sites-available/locations_config_node"
+ERROR_PAGE_SOURCE="/CarBnR_Node_Vue/attached/404.html"
+ERROR_PAGE_DEST="/var/www/html/404.html"
+NGINX_ENABLED="/etc/nginx/sites-enabled/"
+NGINX_AVAILABLE="/etc/nginx/sites-available/locations_config_node"
+
+# Function to print messages
+print_message() {
+    local msg="$1"
+    local color="$2"
+    echo -e "${color}${msg}${NC}"
+}
+
+# Copy configuration and HTML files
+if sudo cp "$CONFIG_SOURCE" "$CONFIG_DEST"; then
+    print_message "Configuration file copied successfully." "$GREEN"
+else
+    print_message "Failed to copy configuration file." "$RED"
+    exit 1
+fi
+
+if sudo cp "$ERROR_PAGE_SOURCE" "$ERROR_PAGE_DEST"; then
+    print_message "404.html copied successfully." "$GREEN"
+else
+    print_message "Failed to copy 404.html." "$RED"
+    exit 1
+fi
+
+# Remove existing enabled sites
+if sudo rm -f ${NGINX_ENABLED}*; then
+    print_message "Existing enabled sites removed successfully." "$GREEN"
+else
+    print_message "Failed to remove existing enabled sites." "$RED"
+    exit 1
+fi
+
+# Create a symbolic link for the new configuration
+if sudo ln -sf "$NGINX_AVAILABLE" "$NGINX_ENABLED/locations_config_node"; then
+    print_message "Symbolic link created successfully." "$GREEN"
+else
+    print_message "Failed to create symbolic link." "$RED"
+    exit 1
+fi
+
+# Test NGINX configuration
+sudo nginx -t
+
+# Restart NGINX service
+if [ $? -eq 0 ]; then
+  sudo service nginx restart
+  print_message "Nginx restarted successfully." "$GREEN"
+else
+  print_message "NGINX configuration test failed. Please check the output above." "$RED"
+fi
