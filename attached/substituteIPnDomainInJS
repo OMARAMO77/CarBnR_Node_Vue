@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+# ANSI color codes for output
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m'  # No color (reset)
+
+# Check if the correct number of arguments is provided
+if [[ $# -ne 2 ]]; then
+    echo -e "${RED}Usage: $0 <directory> <new_ip_or_domain>${NC}"
+    exit 1
+fi
+
+# Assign arguments to variables
+directory=$1
+new_ip_or_domain=$2
+
+# Validate if the new argument is an IP address or a domain with http/https
+if ! [[ $new_ip_or_domain =~ ^([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+|https?:\/\/[a-zA-Z0-9.-]+)$ ]]; then
+    echo -e "${RED}Error: Invalid IP or domain format.${NC}"
+    exit 1
+fi
+
+# Patterns to match IP addresses and domain names with http/https
+ip_pattern='([0-9]{1,3}\.){3}[0-9]{1,3}'
+domain_pattern='https?:\/\/[a-zA-Z0-9.-]+'
+
+# Find all JS files and iterate over them
+changed_files=()
+for file in $(find "$directory" -type f -name "*.js"); do
+    # Check if the file contains an IP address or domain
+    if grep -Eq "$ip_pattern|$domain_pattern" "$file"; then
+        # Replace both IP addresses and domain names
+        sed -E -i.bak "s|$ip_pattern|$new_ip_or_domain|g; s|$domain_pattern|$new_ip_or_domain|g" "$file"
+        
+        # Add to the list of changed files
+        changed_files+=("$file")
+        
+        # Clean up backup file created by sed
+        rm -f "${file}.bak"
+    fi
+done
+
+# Output information about changed files
+if [[ ${#changed_files[@]} -gt 0 ]]; then
+    echo -e "${GREEN}The following files have been modified:${NC}"
+    for changed_file in "${changed_files[@]}"; do
+        echo -e "${GREEN}$changed_file${NC}"
+    done
+else
+    echo -e "${RED}No IP addresses or domain names found in JavaScript files.${NC}"
+fi
