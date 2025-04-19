@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+# Define color variables
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[0;33m'
+NC='\033[0m' # No Color
+
+# Check if a domain argument is provided
+if [ -z "$1" ]; then
+  echo -e "${RED}Error: No domain provided.${NC}"
+  echo -e "${YELLOW}Usage: $0 <domain>${NC}"
+  exit 1
+fi
+
+# Check if the command "dig" is installed, install it if not found
+if ! command -v dig &> /dev/null; then
+    echo -e "${YELLOW}dig is not installed. Installing now...${NC}"
+    if command -v apt-get &> /dev/null; then
+        sudo apt-get update && sudo apt-get install -y dnsutils
+    else
+        echo -e "${RED}Error: Unable to find a supported package manager. Please install dig manually.${NC}"
+        exit 1
+    fi
+    # Verify installation was successful
+    if ! command -v dig &> /dev/null; then
+        echo -e "${RED}Error: Failed to install dig. Please install it manually.${NC}"
+        exit 1
+    fi
+fi
+
+DOMAIN="$1"
+# Perform the DNS lookup for the provided domain
+echo -e "${GREEN}Running DNS lookup for domain: ${DOMAIN}${NC}"
+dig "$DOMAIN"
+
