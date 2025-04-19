@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+# ANSI color codes
+GREEN='\033[0;32m'  # Green for success messages
+RED='\033[0;31m'    # Red for error messages
+NC='\033[0m'        # No color (reset)
+
+# Function to terminate a process on a given port
+terminate_process() {
+  port=$1
+  pids=$(lsof -t -i :$port)
+
+  if [[ -n "$pids" ]]; then
+    # Loop through each PID and kill it
+    for pid in $pids; do
+      kill "$pid"
+      echo -e "${GREEN}Process ($pid) terminated on port $port${NC}"
+    done
+  else
+    echo -e "${RED}No process found on port $port${NC}"
+  fi
+}
+
+# Terminate processes on ports 5000 and 5002
+terminate_process 3000
