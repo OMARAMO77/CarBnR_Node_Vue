@@ -1,0 +1,25 @@
+#!/bin/env bash
+
+# Check if exactly one argument is provided
+if [ "$#" -ne 1 ]; then
+    echo "Usage: $0 file_name"
+    exit 1
+fi
+
+file="$1"
+destination="/nowhere"
+
+# Create the /nowhere directory if it doesn't exist
+if [ ! -d "$destination" ]; then
+    mkdir -p "$destination"
+    echo "Created directory: $destination"
+fi
+
+# Check if the file exists and move it to /nowhere; otherwise, notify that a new file will be created
+if [ -e "$file" ]; then
+    mv "$file" "$destination/"
+    echo "Moved $file to $destination"
+    nano "$file"
+else
+    echo "File does not exist."
+fi
