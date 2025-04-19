@@ -1,0 +1,40 @@
+# Navigate to the root directory
+cd /
+# Install some packages if not already installed
+/CarBnR_Node_Vue/attached/nano_git_lsof
+
+# Clone the repository
+git clone https://github.com/OMARAMO77/CarBnR_Node_Vue.git
+
+# Install NGINX, Create basic index.html and 404.html files, 
+/CarBnR_Node_Vue/attached/ngx_install_redirect_404
+"test:" # (curl 0.0.0.0)  (curl 0.0.0.0/123)  (curl -sI 0.0.0.0/redirect_me)
+
+# Log in to your domain registrar and configure an A record that points to your server’s public IP address
+"test:" # check DNS propagation
+/CarBnR_Node_Vue/attached/check_dns <domain>
+"test:" # (curl  http://domain)  (curl  http://domain/123)  (curl  http://domain/redirect_me)
+
+# Install Certbot, NGINX plugin, Obtain SSL certificate using Certbot with NGINX
+# you should provide your email during the process among other things
+/CarBnR_Node_Vue/attached/ssl_setup.sh <domain>
+"test:" # (curl https://domain)  (curl https://domain/123)  (curl https://domain/redirect_me)
+
+# substitute the old domain with the new one
+/CarBnR_Node_Vue/attached/replace_any_ip_or_domain /CarBnR_Node_Vue/carapp/templates/* <old_domain> <new_domain>  # Socials
+/CarBnR_Node_Vue/attached/replace_any_ip_or_domain /CarBnR_Node_Vue/attached/locations_config_node <old_domain> <new_domain>
+/CarBnR_Node_Vue/attached/substituteIPnDomainInJS <js_directory> <new_ip_or_domain> # should contain https
+
+# Copy configuration and HTML files # Create a symbolic link for the new configuration
+/CarBnR_Node_Vue/attached/config_ngx_create_symlink
+"test:" # (https://domain) in the browser 
+
+# Install UFW if not already installed and set UFW rules
+/CarBnR_Node_Vue/attached/ufw_rules
+"test:" # (curl -sI http://domain:3000/users)
+
+# add /CarBnR_Node_Vue/.env
+
+# set the app
+#/CarBnR_Node_Vue/attached/set_app
+"test:" # (curl -sI https://domain/select_cars) or in the browser 
