@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+# ANSI color codes for output messages
+GREEN='\033[0;32m'  # Green for success
+RED='\033[0;31m'    # Red for error
+YELLOW='\033[0;33m' # Yellow for prompts
+NC='\033[0m'        # No color
+
+# Function to print colored messages
+print_message() {
+    local msg="$1"
+    local color="$2"
+    echo -e "${color}${msg}${NC}"
+}
+
+# Update the system packages
+print_message "Updating package lists..." "$GREEN"
+if ! sudo apt update; then
+    print_message "Failed to update package lists." "$RED"
+    exit 1
+fi
+
+# Install necessary packages
+install_package() {
+    local package="$1"
+    print_message "Installing $package..." "$GREEN"
+    if ! sudo apt-get -y install "$package"; then
+        print_message "Failed to install $package." "$RED"
+        exit 1
+    fi
+}
+
+# tmux won't be used
+#install_package tmux
+install_package lsof
+install_package git
+install_package nano
