@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+
+# ANSI color codes for output messages
+GREEN='\033[0;32m'  # Green for success
+RED='\033[0;31m'    # Red for error
+NC='\033[0m'        # No color
+
+# Function to print colored messages
+print_message() {
+    local msg="$1"
+    local color="$2"
+    echo -e "${color}${msg}${NC}"
+}
+
+# Update package lists
+print_message "Updating package lists..." "$GREEN"
+if sudo apt-get -y update; then
+    print_message "Package lists updated successfully." "$GREEN"
+else
+    print_message "Failed to update package lists." "$RED"
+    exit 1
+fi
+
+# Install NGINX
+print_message "Installing NGINX..." "$GREEN"
+if sudo apt-get -y install nginx; then
+    print_message "NGINX installed successfully." "$GREEN"
+else
+    print_message "Failed to install NGINX." "$RED"
+    exit 1
+fi
+
+# Start NGINX service
+print_message "Starting NGINX..." "$GREEN"
+if sudo service nginx start; then
+    print_message "NGINX started successfully." "$GREEN"
+else
+    print_message "Failed to start NGINX." "$RED"
+    exit 1
+fi
+
+# Create basic index.html and 404.html files
+print_message "Creating HTML files..." "$GREEN"
+if echo "Hello World!" | sudo tee /var/www/html/index.html > /dev/null && \
+   echo "Ceci n'est pas une page" | sudo tee /var/www/html/404.html > /dev/null; then
+    print_message "HTML files created successfully." "$GREEN"
+else
+    print_message "Failed to create HTML files." "$RED"
+    exit 1
+fi
+
+# Modify NGINX default server block for redirection and custom 404 error page
+print_message "Configuring NGINX..." "$GREEN"
+NGINX_CONFIG="/etc/nginx/sites-available/default"
+
+# Insert redirection rule for /redirect_me
+if sudo sed -i '/server_name _;/c \\tlocation \/redirect_me {\n\t\treturn 301 https:\/\/www.youtube.com;\n\t}\n\n####' "$NGINX_CONFIG"; then
+    print_message "Redirection rule added successfully." "$GREEN"
+else
+    print_message "Failed to add redirection rule." "$RED"
+    exit 1
+fi
+
+# Insert custom 404 error page
+if sudo sed -i '/####/c \\terror_page 404 \/404.html;\n\n\tlocation = \/404.html {\n\t\troot \/var\/www\/html\/;\n\t\tinternal;\n\t}' "$NGINX_CONFIG"; then
+    print_message "Custom 404 error page configured successfully." "$GREEN"
+else
+    print_message "Failed to configure custom 404 page." "$RED"
+    exit 1
+fi
+
+# Restart NGINX to apply changes
+print_message "Restarting NGINX to apply changes..." "$GREEN"
+if sudo service nginx restart; then
+    print_message "NGINX restarted successfully." "$GREEN"
+else
+    print_message "Failed to restart NGINX." "$RED"
+    exit 1
+fi
+
+print_message "NGINX setup and configuration complete!" "$GREEN"
