@@ -1,0 +1,71 @@
+# nano /etc/nginx/sites-available/locations_config_node
+# sudo ln -sf /etc/nginx/sites-available/locations_config_node /etc/nginx/sites-enabled/
+# sudo service nginx restart
+# Set up NGINX
+server {
+    listen 443 ssl;
+    server_name n.omar.carbnr.me;
+
+    ssl_certificate /etc/letsencrypt/live/n.omar.carbnr.me/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/n.omar.carbnr.me/privkey.pem;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+
+    root /CarBnR_Node_Vue/frontend/build;
+    index index.html;
+    #root /CarBnR_Node_Vue/my_files/templates;
+    #index landing-page.html;
+
+    error_page 404 /404.html;
+
+    location = /404.html {
+        root /var/www/html/;
+        internal;
+    }
+
+    #location /api/ {
+    #    include proxy_params;
+    #    proxy_pass http://127.0.0.1:5002/api/;
+    #}
+
+    #location / {
+    #    include proxy_params;
+    #    proxy_pass http://127.0.0.1:3000;
+    #}
+
+    location /api/ {
+        include proxy_params;
+        proxy_pass http://127.0.0.1:3000/api/;
+    }
+
+    location /images {
+        include proxy_params;
+        proxy_pass http://127.0.0.1:3000/images;
+    }
+
+    location /static {
+        autoindex off;
+        alias /CarBnR_Node_Vue/my_files/static/;
+    }
+
+    #location ~* \.(css|js|json|xml|html|svg|woff2)$ {
+    #    gzip_static on;
+    #    expires 365d;
+    #    add_header Cache-Control "public, no-transform";
+    #}
+
+    # Deny access to sensitive files
+    location ~ /\.(git|env) {
+        deny all;
+    }
+}
+#gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript image/svg+xml font/woff2;;
+#gzip_types text/plain text/css application/json application/javascript text/xml application/xml image/svg+xml font/woff2;
+server {
+    listen 80;
+    server_name n.omar.carbnr.me;
+
+    # Redirect HTTP to HTTPS
+    return 301 https://$host$request_uri;
+}
