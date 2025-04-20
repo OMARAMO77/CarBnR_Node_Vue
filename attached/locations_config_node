@@ -12,7 +12,8 @@ server {
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_prefer_server_ciphers on;
 
-    root /CarBnR_Node_Vue/my_files/templates;
+    root /CarBnR_Node_Vue/frontend/dist;
+    #root /CarBnR_Node_Vue/my_files/templates;
     index landing-page.html;
 
     error_page 404 /404.html;
