@@ -1,5 +1,4 @@
 // index.js (Updated with Security Enhancements)
-
 // 1. Load environment variables from .env file
 require('dotenv').config();
 
